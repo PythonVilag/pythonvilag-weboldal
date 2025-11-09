@@ -1,0 +1,29 @@
+<script src="https://cdn.jsdelivr.net/npm/quizdown@latest/public/build/quizdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quizdown@latest/public/build/extensions/quizdownKatex.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quizdown@latest/public/build/extensions/quizdownHighlight.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document
+      .querySelectorAll(".quizdown[data-quizdown-b64]")
+      .forEach(function (el) {
+        try {
+          var md = atob(el.getAttribute("data-quizdown-b64"));
+          el.textContent = md;
+        } catch (e) {
+          console.error("quizdown: decode failed", e);
+        }
+      });
+
+    var config = {
+      startOnLoad: true,
+      shuffleAnswers: true,
+      shuffleQuestions: false,
+      primaryColor: "#60A5FA",
+      secondaryColor: "#CBD5E1",
+      textColor: "black",
+      enableRetry: true,
+    };
+
+    quizdown.register(quizdownHighlight).register(quizdownKatex).init(config);
+  });
+</script>

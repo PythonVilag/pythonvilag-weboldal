@@ -1,0 +1,55 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 12 * * 6" # Every Saturday at 12:00
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5.0.0
+
+      - name: Run megalinter
+        uses: oxsecurity/megalinter/flavors/cupcake@v9.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MEGALINTER_CONFIG: .github/linters/.megalinter.yml
+
+  ci:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v5.0.0
+        with:
+          submodules: true
+
+      - name: Setup hugo
+        uses: peaceiris/actions-hugo@v3.0.0
+        with:
+          hugo-version: "latest"
+
+      - name: Build documentation
+        run: >
+          hugo build --minify --destination public
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-pages-artifact@v4.0.0
+        with:
+          name: site
+          path: public
